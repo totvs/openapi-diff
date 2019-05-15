@@ -3,6 +3,7 @@ package com.qdesrame.openapi.diff;
 import com.qdesrame.openapi.diff.model.ChangedOpenApi;
 import com.qdesrame.openapi.diff.output.ConsoleRender;
 import com.qdesrame.openapi.diff.output.HtmlRender;
+import com.qdesrame.openapi.diff.output.JSONRender;
 import com.qdesrame.openapi.diff.output.MarkdownRender;
 import java.io.File;
 import java.io.IOException;
@@ -143,6 +144,10 @@ public class Main {
       if (!logLevel.equals("OFF")) {
         System.out.println(consoleRender.render(result));
       }
+
+      JSONRender jsonRender = new JSONRender();
+      System.out.println(jsonRender.render(result,true));
+
       HtmlRender htmlRender = new HtmlRender();
       MarkdownRender mdRender = new MarkdownRender();
       String output = null;

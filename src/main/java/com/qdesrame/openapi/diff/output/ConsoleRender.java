@@ -3,6 +3,7 @@ package com.qdesrame.openapi.diff.output;
 import static com.qdesrame.openapi.diff.model.Changed.result;
 
 import com.qdesrame.openapi.diff.model.*;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.util.List;
@@ -165,8 +166,9 @@ public class ConsoleRender implements Render {
     StringBuilder sb = new StringBuilder();
     sb.append(itemContent(title, contentType))
         .append(StringUtils.repeat(' ', 10))
-        .append("Schema: ")
+        .append("BackwardCompatible: ")
         .append(changedMediaType.isCompatible() ? "Backward compatible" : "Broken compatibility")
+        .append(listSchema(changedMediaType.getSchema(),1))
         .append(System.lineSeparator());
     return sb.toString();
   }
@@ -235,7 +237,7 @@ public class ConsoleRender implements Render {
   }
 
   public String bigTitle(String title) {
-    char ch = '=';
+    char ch = '-';
     return this.title(title.toUpperCase(), ch);
   }
 
@@ -253,5 +255,91 @@ public class ConsoleRender implements Render {
   public StringBuilder separator(char ch) {
     StringBuilder sb = new StringBuilder();
     return sb.append(StringUtils.repeat(ch, LINE_LENGTH)).append(System.lineSeparator());
+  }
+
+  private String listSchema(ChangedSchema changedSchema, int identationLevel){
+    if(changedSchema == null)
+      return null;
+
+    Map<String, Schema> addProperties = changedSchema.getIncreasedProperties();
+    Map<String, Schema> deleteProperties= changedSchema.getMissingProperties();
+    Map<String, ChangedSchema> changedProperties = changedSchema.getChangedProperties();
+
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(whiteSpaces(identationLevel))
+            .append("isBackwardCompatible: " + changedSchema.isCompatible());
+
+    for (String propName : addProperties.keySet()) {
+      sb.append("- add: " + propName)
+              .append(whiteSpaces(identationLevel));
+
+    }
+    for (String propName : deleteProperties.keySet()) {
+      sb.append(whiteSpaces(identationLevel))
+              .append("- delete: " + propName);
+    }
+    for (String propName : changedProperties.keySet()) {
+      sb.append(whiteSpaces(identationLevel))
+              .append("- changed: " +
+              itemChangedProperty( propName, changedProperties.get(propName),identationLevel+1));
+    }
+
+    return sb.toString();
+  }
+
+  private String itemChangedProperty(
+          String propertyName, ChangedSchema changedProperty,int identationLevel){
+
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(whiteSpaces(identationLevel))
+            .append("property: " + propertyName);
+
+    sb.append(whiteSpaces(identationLevel))
+            .append("isBackwardCompatible: " + changedProperty.isCompatible());
+
+    if(changedProperty.getType() != null)
+      sb.append(whiteSpaces(identationLevel))
+              .append("type: " + changedProperty.getType());
+
+    if(changedProperty.getDescription() != null)
+      sb.append(whiteSpaces(identationLevel))
+              .append("description: " + changedProperty.getDescription().getRight());
+
+    if(changedProperty.getRequired() != null)
+      sb.append(whiteSpaces(identationLevel))
+              .append("isChangeRequired: " +
+                      changedProperty.getRequired().isItemsChanged().isUnchanged());
+
+    if(changedProperty.getEnumeration() != null &&
+      !changedProperty.getEnumeration().getNewValue().isEmpty())
+      sb.append(whiteSpaces(identationLevel))
+              .append("enumeration: " + changedProperty.getEnumeration().getNewValue());
+
+    if(changedProperty.getType() == "array") {
+      sb.append(whiteSpaces(identationLevel))
+              .append("properties: " + listSchema(
+                      changedProperty.getItems(),identationLevel + 1));
+    }else{
+      if(!(changedProperty.getIncreasedProperties().isEmpty() &&
+              changedProperty.getMissingProperties().isEmpty() &&
+              changedProperty.getChangedProperties().isEmpty()))
+        sb.append(whiteSpaces(identationLevel))
+                .append("properties: " + listSchema(
+                        changedProperty,identationLevel + 1));
+    }
+    return sb.toString();
+  }
+
+  private String whiteSpaces(int size){
+    String whiteSpace = "\n";
+    int nx;
+
+    for (nx = 1;nx <= size; nx++) {
+      whiteSpace = whiteSpace + "  ";
+    }
+
+    return whiteSpace;
   }
 }

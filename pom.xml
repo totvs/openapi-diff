@@ -9,7 +9,7 @@
 
     <groupId>com.qdesrame</groupId>
     <artifactId>openapi-diff</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.4-TOTVS</version>
     <packaging>jar</packaging>
 
     <name>openapi-diff</name>
@@ -129,6 +129,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
         </dependency>
     </dependencies>
 
@@ -280,11 +285,7 @@
                 <artifactId>fmt-maven-plugin</artifactId>
                 <version>2.6.0</version>
                 <executions>
-                    <execution>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
+
                 </executions>
             </plugin>
             <plugin>
@@ -292,18 +293,7 @@
                 <artifactId>githook-maven-plugin</artifactId>
                 <version>1.0.0</version>
                 <executions>
-                    <execution>
-                        <goals>
-                            <goal>install</goal>
-                        </goals>
-                        <configuration>
-                            <hooks>
-                                <pre-commit>
-                                    mvn com.coveo:fmt-maven-plugin:format
-                                </pre-commit>
-                            </hooks>
-                        </configuration>
-                    </execution>
+                    
                 </executions>
             </plugin>
         </plugins>
